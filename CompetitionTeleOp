@@ -1,0 +1,232 @@
+package com.qualcomm.ftcrobotcontroller.opmodes.FTC3805;
+
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorController;
+import com.qualcomm.robotcore.hardware.Servo;
+
+/**************CONTROLS*****************************************************************************
+ Gamepad 1:
+ * Drive:
+ * Left Stick Y: Left Drive Wheels
+ * Right Stick Y: Right Drive Wheels
+ * Left Bumper: Left Flipper
+ * Right Bumper: Right Flipper
+ * A Button: Climber Deposit Servo
+ Gamepad 2:
+ * Right Trigger: Collection Reverse
+ * Left Trigger: Collection Forward
+ * A Button: Tilt Position 1
+ * B Button: Tilt Position 2
+ * Y Button: Tilt Position 3
+ * X Button: Tilt Position 4
+ * D-Pad Up: Arm Extension Expand
+ * D-Pad Down: Arm Extension Retract
+ * Left Bumper: Slide Deposit Left
+ * Right Bumper: Slide Deposit Right
+ * Start Button: Deposit Either Side
+ * *************************************************************************************************
+ */
+
+public class CompetitionTeleOp extends OpMode {
+	// Drive train
+	DcMotor leftMotor;
+	DcMotor rightMotor;
+
+    // Flipper servos
+    Servo leftFlipperServo;
+    Servo rightFlipperServo;
+
+    // Climber deposit servo
+    Servo climberDepositServo;
+
+    // Button servos
+    Servo leftButtonServo;
+    Servo rightButtonServo;
+
+	// Arm
+	DcMotor extensionMotor;
+	DcMotor tiltMotor;
+
+	// Collection
+	DcMotor collectionMotor;
+
+	// Hand servos
+	Servo slideServo;
+	Servo basketServo;
+
+	/**
+	 * Constructor
+	 */
+	public CompetitionTeleOp() {
+
+	}
+
+	/*
+	 * Code to run when the op mode is first enabled goes here
+	 *
+	 * @see com.qualcomm.robotcore.eventloop.opmode.OpMode#start()
+	 */
+	@Override
+	public void init() {
+		// Drive train
+		leftMotor = hardwareMap.dcMotor.get("LM");
+		rightMotor = hardwareMap.dcMotor.get("RM");
+		rightMotor.setDirection(DcMotor.Direction.REVERSE);
+
+		// Arm
+		extensionMotor = hardwareMap.dcMotor.get("EM");
+		tiltMotor = hardwareMap.dcMotor.get("TM");
+
+		tiltMotor.setDirection(DcMotor.Direction.REVERSE);
+		tiltMotor.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
+
+        extensionMotor.setChannelMode(DcMotorController.RunMode.RUN_USING_ENCODERS);
+
+		// Collection
+		collectionMotor = hardwareMap.dcMotor.get("CM");
+
+		// Hand servos
+		slideServo = hardwareMap.servo.get("SS");
+		basketServo = hardwareMap.servo.get("TS");
+
+		slideServo.setPosition(0.5);
+		basketServo.setPosition(0.5);
+
+		// Flipper servos
+        leftFlipperServo = hardwareMap.servo.get("LFS");
+        rightFlipperServo = hardwareMap.servo.get("RFS");
+        leftFlipperServo.setDirection(Servo.Direction.REVERSE);
+
+        // Button servos
+        leftButtonServo = hardwareMap.servo.get("LBS");
+        rightButtonServo = hardwareMap.servo.get("RBS");
+
+        // Climber deposit servo
+        climberDepositServo = hardwareMap.servo.get("CDS");
+
+
+
+        /*
+        MOTOR CONTROLLER DRIVE:
+            LM
+            RM
+        MOTOR CONTROLLER TILT/COLLECTION:
+            TM
+            CM
+        MOTOR CONTROLLER EXTENSION:
+            EM
+        SERVO CONTROLLER DRIVE:
+            LFS
+            RFS
+            LBS
+            RBS
+            CDS
+        SERVO CONTROLLER ARM:
+        	SS
+        	TS
+         */
+	}
+
+	/*
+	 * This method will be called repeatedly in a loop
+	 *
+	 * @see com.qualcomm.robotcore.eventloop.opmode.OpMode#run()
+	 */
+	@Override
+	public void loop() {
+		// Driver 1
+		// Tank Drive
+		leftMotor.setPower(-gamepad1.left_stick_y);
+		rightMotor.setPower(-gamepad1.right_stick_y);
+
+        // Flipper Servos
+        if(gamepad1.left_bumper) {
+            leftFlipperServo.setPosition(0.5);
+            rightFlipperServo.setPosition(0.2);
+        }
+        else if(gamepad1.right_bumper) {
+            leftFlipperServo.setPosition(0.2);
+            rightFlipperServo.setPosition(0.5);
+        }
+        else {
+            leftFlipperServo.setPosition(0.2);
+            rightFlipperServo.setPosition(0.2);
+        }
+
+        // Autonomous Deposit Arm
+        if(gamepad1.a) {
+            climberDepositServo.setPosition(1);
+        }
+        else {
+            climberDepositServo.setPosition(0);
+        }
+
+		// Driver 2
+		// Collection
+		collectionMotor.setPower(gamepad2.right_trigger - gamepad2.left_trigger);
+
+        // Arm Extension
+		if(gamepad2.dpad_up){
+			extensionMotor.setPower(-1);
+		}
+		else if(gamepad2.dpad_down){
+			extensionMotor.setPower(-1);
+		}
+		else{
+			extensionMotor.setPower(0);
+		}
+
+        telemetry.addData("Extension Encoder", extensionMotor.getCurrentPosition());
+
+        // Arm Tilt
+		if(gamepad2.a){
+			tiltMotor.setTargetPosition(0);		// Position 1
+		}
+		else if(gamepad2.b){
+			tiltMotor.setTargetPosition(1400);  // Position 2
+		}
+		else if(gamepad2.y){
+			tiltMotor.setTargetPosition(1680);  // Position 3
+		}
+		else if(gamepad2.x){
+			tiltMotor.setTargetPosition(2520);  // Emergency Flip Position
+		}
+        tiltMotor.setPower(0.3);
+
+        telemetry.addData("Tilt Encoder", tiltMotor.getCurrentPosition());
+
+        // Arm Deposit
+        if(gamepad2.left_bumper) {
+            slideServo.setPosition(0.3);
+        }
+        else if(gamepad2.right_bumper) {
+            slideServo.setPosition(0.7);
+        }
+        else {
+            slideServo.setPosition(0.5);
+        }
+
+        if(gamepad2.start) {
+            if(slideServo.getPosition() == 0.3){
+                basketServo.setPosition(0.4);
+            }
+            else if(slideServo.getPosition() == 0.7){
+                basketServo.setPosition(0.6);
+            }
+            else{
+                basketServo.setPosition(0.5);
+            }
+        }
+    }
+
+	/*
+	 * Code to run when the op mode is first disabled goes here
+	 *
+	 * @see com.qualcomm.robotcore.eventloop.opmode.OpMode#stop()
+	 */
+	@Override
+	public void stop() {
+
+	}
+}
