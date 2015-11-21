@@ -6,8 +6,32 @@ import com.qualcomm.robotcore.hardware.DcMotorController;
 import com.qualcomm.robotcore.hardware.Servo;
 
 // TODO Add comment for controls
+/*****Controls********
+// Driver 1 (Wheels)
+ Left Wheels:   Left JoyStick Y
+ Right Wheels:  Right JoyStick Y
+ Left Flipper:  Left Bumper
+ Right Flipper: Right Bumper
+
+// Driver 2 (Arm)
+ Left Trigger:  Collection Forward
+ Right Trigger: Collection Reverse
+ // Arm
+ Tilt Pos. 1:   A Button
+ Tilt Pos. 2:   B Button
+ Tilt Pos. 3:   Y Button
+ Tilt Righter:  Logitech Button
+ Arm Extend:    DPad Up
+ Arm Retract:   DPad Down
+ // Hand
+ Slide Left:    Left Bumper
+ Slide Right:   Right Bumper
+ Deposit Left:  DPad Left
+ Deposit Right: DPad Right
+*/
+
 // TODO Add comment for configuration
-/*
+/*****Configuration***
 // Left Servo Controller (Dark Blue)
 1: LFS
 2: CS
