@@ -7,13 +7,14 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 // TODO Add comment for controls
 /*****Controls********
-// Driver 1 (Wheels)
+ // Driver 1 (Wheels)
  Left Wheels:   Left JoyStick Y
  Right Wheels:  Right JoyStick Y
  Left Flipper:  Left Bumper
  Right Flipper: Right Bumper
+ Collect Gate:  Left Trigger
 
-// Driver 2 (Arm)
+ // Driver 2 (Arm)
  Left Trigger:  Collection Forward
  Right Trigger: Collection Reverse
  // Arm
@@ -28,39 +29,39 @@ import com.qualcomm.robotcore.hardware.Servo;
  Slide Right:   Right Bumper
  Deposit Left:  DPad Left
  Deposit Right: DPad Right
-*/
+ */
 
 // TODO Add comment for configuration
-/*****Configuration***
-// Left Servo Controller (Dark Blue)
-1: LFS
-2: CS
-3: HGS
-4-6: Nothing
+/*****Config**********
+ // Left Servo Controller (Dark Blue)
+ 1: LFS
+ 2: CS
+ 3: HGS
+ 4-6: Nothing
 
-// Right Servo Controller (Orange)
-1: RFS
-2: BS
-3-6: Nothing
+ // Right Servo Controller (Orange)
+ 1: RFS
+ 2: BS
+ 3-6: Nothing
 
-// Hand Servo Controller (Yellow)
-1: HSS
-2: HTS
-3: HDS
-4-6: Nothing
+ // Hand Servo Controller (Yellow)
+ 1: HSS
+ 2: HTS
+ 3: HDS
+ 4-6: Nothing
 
-// Drive Motor Controller (Green)
-1: LM
-2: RM
+ // Drive Motor Controller (Green)
+ 1: LM
+ 2: RM
 
-// Tilt and Collection Motor Controller (Light Blue)
-1: CM
-2: TM
+ // Tilt and Collection Motor Controller (Light Blue)
+ 1: CM
+ 2: TM
 
-// Extension Motor Controller (Red)
-1: Nothing
-2: EM
-*/
+ // Extension Motor Controller (Red)
+ 1: Nothing
+ 2: EM
+ */
 public class CompetitionTeleOp extends OpMode {
     // Drive train
     DcMotor leftMotor;
@@ -132,6 +133,9 @@ public class CompetitionTeleOp extends OpMode {
         // Button and climber servos
         buttonServo = hardwareMap.servo.get("BS");
         climberServo = hardwareMap.servo.get("CS");
+
+        buttonServo.setPosition(0);
+        climberServo.setPosition(0);
     }
 
     /*
@@ -158,6 +162,14 @@ public class CompetitionTeleOp extends OpMode {
             rightFlipperServo.setPosition(0.2);
         }
 
+        // Collection Gate
+        if (gamepad1.left_trigger < 0.5) {
+            handGateServo.setPosition(1);
+        }
+        else{
+            handGateServo.setPosition(0.5);
+        }
+
         // Driver 2
         // Collection
         collectionMotor.setPower(gamepad2.right_trigger - gamepad2.left_trigger);
@@ -180,15 +192,15 @@ public class CompetitionTeleOp extends OpMode {
             tiltMotor.setTargetPosition(0);		// Position 1
         }
         else if(gamepad2.b){
-            tiltMotor.setTargetPosition(1400);  // Position 2
+            tiltMotor.setTargetPosition(933);  // Position 2
         }
         else if(gamepad2.y){
-            tiltMotor.setTargetPosition(1680);  // Position 3
+            tiltMotor.setTargetPosition(1026);  // Position 3
         }
         else if(gamepad2.guide){
-            tiltMotor.setTargetPosition(2240);  // Emergency Flip Position
+            tiltMotor.setTargetPosition(1493);  // Emergency Flip Position
         }
-        tiltMotor.setPower(0.2);
+        tiltMotor.setPower(0.13);
 
         telemetry.addData("Tilt Encoder", tiltMotor.getCurrentPosition());
 
@@ -198,8 +210,7 @@ public class CompetitionTeleOp extends OpMode {
         }
         else if(gamepad2.right_bumper){
             handSlideServo.setPosition(0.7);
-        }
-        else{
+        } else{
             handSlideServo.setPosition(0.5);
         }
 
@@ -214,14 +225,6 @@ public class CompetitionTeleOp extends OpMode {
         else{
             handTiltServo.setPosition(0.516);
             handDoorsServo.setPosition(0.5);
-        }
-
-        // Collection Gate
-        if (collectionMotor.getPower() < 0) {
-            handGateServo.setPosition(0.5);
-        }
-        else{
-            handGateServo.setPosition(1);
         }
     }
 
