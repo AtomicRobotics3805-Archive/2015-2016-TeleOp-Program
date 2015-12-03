@@ -1,4 +1,33 @@
-package com.qualcomm.ftcrobotcontroller.opmodes.FTC3805;
+package com.qualcomm.ftcrobotcontroller.opmodes;/* Copyright (c) 2014, 2015 Qualcomm Technologies Inc
+
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification,
+are permitted (subject to the limitations in the disclaimer below) provided that
+the following conditions are met:
+
+Redistributions of source code must retain the above copyright notice, this list
+of conditions and the following disclaimer.
+
+Redistributions in binary form must reproduce the above copyright notice, this
+list of conditions and the following disclaimer in the documentation and/or
+other materials provided with the distribution.
+
+Neither the name of Qualcomm Technologies Inc nor the names of its contributors
+may be used to endorse or promote products derived from this software without
+specific prior written permission.
+
+NO EXPRESS OR IMPLIED LICENSES TO ANY PARTY'S PATENT RIGHTS ARE GRANTED BY THIS
+LICENSE. THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+"AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. */
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -6,235 +35,211 @@ import com.qualcomm.robotcore.hardware.DcMotorController;
 import com.qualcomm.robotcore.hardware.Servo;
 
 // TODO Add comment for controls
-/*****Controls********
- // Driver 1 (Wheels)
- Left Wheels:   Left JoyStick Y
- Right Wheels:  Right JoyStick Y
- Left Flipper:  Left Bumper
- Right Flipper: Right Bumper
- Collect Gate:  Left Trigger
-
- // Driver 2 (Arm)
- Left Trigger:  Collection Forward
- Right Trigger: Collection Reverse
- // Arm
- Tilt Pos. 1:   A Button
- Tilt Pos. 2:   B Button
- Tilt Pos. 3:   Y Button
- Tilt Righter:  Logitech Button
- Arm Extend:    DPad Up
- Arm Retract:   DPad Down
- // Hand
- Slide Left:    Left Bumper
- Slide Right:   Right Bumper
- Deposit Left:  DPad Left
- Deposit Right: DPad Right
- */
-
 // TODO Add comment for configuration
-/*****Config**********
- // Left Servo Controller (Dark Blue)
- 1: LFS
- 2: CS
- 3: HGS
- 4-6: Nothing
+/*
+// Left Servo Controller (Dark Blue)
+1: LFS
+2: CS
+3: HGS
+4-6: Nothing
 
- // Right Servo Controller (Orange)
- 1: RFS
- 2: BS
- 3-6: Nothing
+// Right Servo Controller (Orange)
+1: RFS
+2: BS
+3-6: Nothing
 
- // Hand Servo Controller (Yellow)
- 1: HSS
- 2: HTS
- 3: HDS
- 4-6: Nothing
+// Hand Servo Controller (Yellow)
+1: HSS
+2: HTS
+3: HDS
+4-6: Nothing
 
- // Drive Motor Controller (Green)
- 1: LM
- 2: RM
+// Drive Motor Controller (Green)
+1: LM
+2: RM
 
- // Tilt and Collection Motor Controller (Light Blue)
- 1: CM
- 2: TM
+// Tilt and Collection Motor Controller (Light Blue)
+1: CM
+2: TM
 
- // Extension Motor Controller (Red)
- 1: Nothing
- 2: EM
- */
-public class CompetitionTeleOp extends OpMode {
+// Extension Motor Controller (Red)
+1: Nothing
+2: EM
+*/
+public class HillelsTeleopProgram extends OpMode {
+  // Drive train
+  DcMotor leftMotor;
+  DcMotor rightMotor;
+
+  // Collection
+  DcMotor collectionMotor;
+
+  // Arm
+  DcMotor extensionMotor;
+  DcMotor tiltMotor;
+
+  // Hand servos
+  Servo handSlideServo;
+  Servo handTiltServo;
+  Servo handGateServo;
+  Servo handDoorsServo;
+
+  // Flipper servos
+  Servo leftFlipperServo;
+  Servo rightFlipperServo;
+
+  // Button and climber servos
+  Servo buttonServo;
+  Servo climberServo;
+
+  /**
+   * Constructor
+   */
+  public HillelsTeleopProgram() {
+
+  }
+
+  /*
+   * Code to run when the op mode is first enabled goes here
+   *
+   * @see com.qualcomm.robotcore.eventloop.opmode.OpMode#start()
+   */
+  @Override
+  public void init() {
     // Drive train
-    DcMotor leftMotor;
-    DcMotor rightMotor;
-
-    // Collection
-    DcMotor collectionMotor;
+    leftMotor = hardwareMap.dcMotor.get("LM");
+    rightMotor = hardwareMap.dcMotor.get("RM");
+    rightMotor.setDirection(DcMotor.Direction.REVERSE);
 
     // Arm
-    DcMotor extensionMotor;
-    DcMotor tiltMotor;
+    extensionMotor = hardwareMap.dcMotor.get("EM");
+    tiltMotor = hardwareMap.dcMotor.get("TM");
+
+    extensionMotor.setDirection(DcMotor.Direction.REVERSE);
+
+    tiltMotor.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
+    tiltMotor.setDirection(DcMotor.Direction.REVERSE);
+
+    // Collection
+    collectionMotor = hardwareMap.dcMotor.get("CM");
 
     // Hand servos
-    Servo handSlideServo;
-    Servo handTiltServo;
-    Servo handGateServo;
-    Servo handDoorsServo;
+    handSlideServo = hardwareMap.servo.get("HSS");
+    handTiltServo = hardwareMap.servo.get("HTS");
+    handGateServo = hardwareMap.servo.get("HGS");
+    handDoorsServo = hardwareMap.servo.get("HDS");
 
     // Flipper servos
-    Servo leftFlipperServo;
-    Servo rightFlipperServo;
+    leftFlipperServo = hardwareMap.servo.get("LFS");
+    rightFlipperServo = hardwareMap.servo.get("RFS");
+    leftFlipperServo.setDirection(Servo.Direction.REVERSE);
 
     // Button and climber servos
-    Servo buttonServo;
-    Servo climberServo;
+    buttonServo = hardwareMap.servo.get("BS");
+    climberServo = hardwareMap.servo.get("CS");
 
-    /**
-     * Constructor
-     */
-    public CompetitionTeleOp() {
+    buttonServo.setPosition(0);
+    climberServo.setPosition(0);
+  }
 
+  /*
+   * This method will be called repeatedly in a loop
+   *
+   * @see com.qualcomm.robotcore.eventloop.opmode.OpMode#run()
+   */
+  @Override
+  public void loop() {
+    // Driver 1
+    // Tank Drive
+    leftMotor.setPower(-gamepad1.left_stick_y);
+    rightMotor.setPower(-gamepad1.right_stick_y);
+
+    // Flipper Servos
+    if (gamepad1.left_bumper) {
+      leftFlipperServo.setPosition(0.5);
+      rightFlipperServo.setPosition(0.2);
+    } else if (gamepad1.right_bumper) {
+      leftFlipperServo.setPosition(0.2);
+      rightFlipperServo.setPosition(0.5);
+    } else {
+      leftFlipperServo.setPosition(0.2);
+      rightFlipperServo.setPosition(0.2);
     }
 
-    /*
-     * Code to run when the op mode is first enabled goes here
-     *
-     * @see com.qualcomm.robotcore.eventloop.opmode.OpMode#start()
-     */
-    @Override
-    public void init() {
-        // Drive train
-        leftMotor = hardwareMap.dcMotor.get("LM");
-        rightMotor = hardwareMap.dcMotor.get("RM");
-        rightMotor.setDirection(DcMotor.Direction.REVERSE);
-
-        // Arm
-        extensionMotor = hardwareMap.dcMotor.get("EM");
-        tiltMotor = hardwareMap.dcMotor.get("TM");
-
-        extensionMotor.setDirection(DcMotor.Direction.REVERSE);
-
-        tiltMotor.setChannelMode(DcMotorController.RunMode.RUN_TO_POSITION);
-        tiltMotor.setDirection(DcMotor.Direction.REVERSE);
-
-        // Collection
-        collectionMotor = hardwareMap.dcMotor.get("CM");
-
-        // Hand servos
-        handSlideServo = hardwareMap.servo.get("HSS");
-        handTiltServo = hardwareMap.servo.get("HTS");
-        handGateServo = hardwareMap.servo.get("HGS");
-        handDoorsServo = hardwareMap.servo.get("HDS");
-
-        // Flipper servos
-        leftFlipperServo = hardwareMap.servo.get("LFS");
-        rightFlipperServo = hardwareMap.servo.get("RFS");
-        leftFlipperServo.setDirection(Servo.Direction.REVERSE);
-
-        // Button and climber servos
-        buttonServo = hardwareMap.servo.get("BS");
-        climberServo = hardwareMap.servo.get("CS");
-
-        buttonServo.setPosition(0);
-        climberServo.setPosition(0);
+    // Collection Gate
+    if (gamepad1.left_trigger < 0.5) {
+      handGateServo.setPosition(1);
+    }
+    else{
+      handGateServo.setPosition(0.5);
     }
 
-    /*
-     * This method will be called repeatedly in a loop
-     *
-     * @see com.qualcomm.robotcore.eventloop.opmode.OpMode#run()
-     */
-    @Override
-    public void loop() {
-        // Driver 1
-        // Tank Drive
-        leftMotor.setPower(-gamepad1.left_stick_y);
-        rightMotor.setPower(-gamepad1.right_stick_y);
+    // Driver 2
+    // Collection
+    collectionMotor.setPower(gamepad2.right_trigger - gamepad2.left_trigger);
 
-        // Flipper Servos
-        if (gamepad1.left_bumper) {
-            leftFlipperServo.setPosition(0.5);
-            rightFlipperServo.setPosition(0.2);
-        } else if (gamepad1.right_bumper) {
-            leftFlipperServo.setPosition(0.2);
-            rightFlipperServo.setPosition(0.5);
-        } else {
-            leftFlipperServo.setPosition(0.2);
-            rightFlipperServo.setPosition(0.2);
-        }
-
-        // Collection Gate
-        if (gamepad1.left_trigger < 0.5) {
-            handGateServo.setPosition(1);
-        }
-        else{
-            handGateServo.setPosition(0.5);
-        }
-
-        // Driver 2
-        // Collection
-        collectionMotor.setPower(gamepad2.right_trigger - gamepad2.left_trigger);
-
-        // Arm Extension
-        if(gamepad2.dpad_up){
-            extensionMotor.setPower(1);
-        }
-        else if(gamepad2.dpad_down) {
-            extensionMotor.setPower(-1);
-        }
-        else{
-            extensionMotor.setPower(0);
-        }
-
-        telemetry.addData("Extension Encoder", extensionMotor.getCurrentPosition());
-
-        // Arm Tilt
-        if(gamepad2.a){
-            tiltMotor.setTargetPosition(0);		// Position 1
-        }
-        else if(gamepad2.b){
-            tiltMotor.setTargetPosition(933);  // Position 2
-        }
-        else if(gamepad2.y){
-            tiltMotor.setTargetPosition(1026);  // Position 3
-        }
-        else if(gamepad2.guide){
-            tiltMotor.setTargetPosition(1493);  // Emergency Flip Position
-        }
-        tiltMotor.setPower(0.13);
-
-        telemetry.addData("Tilt Encoder", tiltMotor.getCurrentPosition());
-
-        // Arm Deposit
-        if(gamepad2.left_bumper){
-            handSlideServo.setPosition(0.3);
-        }
-        else if(gamepad2.right_bumper){
-            handSlideServo.setPosition(0.7);
-        } else{
-            handSlideServo.setPosition(0.5);
-        }
-
-        if(gamepad2.dpad_left){
-            handTiltServo.setPosition(0.316);
-            handDoorsServo.setPosition(0);
-        }
-        else if(gamepad2.dpad_right){
-            handTiltServo.setPosition(0.716);
-            handDoorsServo.setPosition(0);
-        }
-        else{
-            handTiltServo.setPosition(0.516);
-            handDoorsServo.setPosition(0.5);
-        }
+    // Arm Extension
+    if(gamepad2.dpad_up){
+      extensionMotor.setPower(1);
+    }
+    else if(gamepad2.dpad_down) {
+      extensionMotor.setPower(-1);
+    }
+    else{
+      extensionMotor.setPower(0);
     }
 
-    /*
-     * Code to run when the op mode is first disabled goes here
-     *
-     * @see com.qualcomm.robotcore.eventloop.opmode.OpMode#stop()
-     */
-    @Override
-    public void stop() {
+    telemetry.addData("Extension Encoder", extensionMotor.getCurrentPosition());
 
+    // Arm Tilt
+    if(gamepad2.a){
+      tiltMotor.setTargetPosition(0);		// Position 1
     }
+    else if(gamepad2.b){
+      tiltMotor.setTargetPosition(1400);  // Position 2
+    }
+    else if(gamepad2.y){
+      tiltMotor.setTargetPosition(1540);  // Position 3
+    }
+    else if(gamepad2.guide){
+      tiltMotor.setTargetPosition(2240);  // Emergency Flip Position
+    }
+    tiltMotor.setPower(0.13);
+
+    telemetry.addData("Tilt Encoder", tiltMotor.getCurrentPosition());
+
+    // Arm Deposit
+    if(gamepad2.left_bumper){
+      handSlideServo.setPosition(0.3);
+    }
+    else if(gamepad2.right_bumper){
+      handSlideServo.setPosition(0.7);
+    } else{
+      handSlideServo.setPosition(0.5);
+    }
+
+    if(gamepad2.dpad_left){
+      handTiltServo.setPosition(0.316);
+      handDoorsServo.setPosition(0);
+    }
+    else if(gamepad2.dpad_right){
+      handTiltServo.setPosition(0.716);
+      handDoorsServo.setPosition(0);
+    }
+    else{
+      handTiltServo.setPosition(0.516);
+      handDoorsServo.setPosition(0.5);
+    }
+  }
+
+  /*
+   * Code to run when the op mode is first disabled goes here
+   *
+   * @see com.qualcomm.robotcore.eventloop.opmode.OpMode#stop()
+   */
+  @Override
+  public void stop() {
+
+  }
 }
+
