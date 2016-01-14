@@ -221,19 +221,27 @@ public class CompetitionTeleOp extends OpMode {
         telemetry.addData("Tilt Encoder", tiltMotor.getCurrentPosition());
 
         // Arm Deposit
-        handSlideServo.setPosition((gamepad2.left_stick_x * 0.2) + 0.5);
-
-        if(gamepad2.left_bumper){
+        if(gamepad2.left_stick_x  == -1){
             handTiltServo.setPosition(0.316);
             handDoorsServo.setPosition(0);
         }
-        else if(gamepad2.right_bumper){
+        else if(gamepad2.left_stick_x == 1) {
             handTiltServo.setPosition(0.716);
             handDoorsServo.setPosition(0);
         }
         else{
             handTiltServo.setPosition(0.516);
             handDoorsServo.setPosition(0.5);
+        }
+
+        if(gamepad2.left_bumper){
+            handSlideServo.setPosition(0.7);
+        }
+        else if(gamepad2.right_bumper){
+            handSlideServo.setPosition(0.3);
+        }
+        else{
+            handSlideServo.setPosition(0.5);
         }
 
         // Climber Deposit
