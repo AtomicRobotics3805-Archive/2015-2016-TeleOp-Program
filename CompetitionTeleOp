@@ -89,9 +89,13 @@ public class CompetitionTeleOp extends OpMode {
     Servo leftFlipperServo;
     Servo rightFlipperServo;
 
-    // Button and climber servos
+    // Button, climber and front blocker servos
     Servo buttonServo;
     Servo climberServo;
+    Servo blockerServo;
+
+    double lastRightTrigger = 0;
+    boolean toggled = false;
 
     /*
      * Constructor
@@ -135,9 +139,10 @@ public class CompetitionTeleOp extends OpMode {
         rightFlipperServo = hardwareMap.servo.get("RFS");
         leftFlipperServo.setDirection(Servo.Direction.REVERSE);
 
-        // Button and climber servos
+        // Button climber, and front blocker servos
         buttonServo = hardwareMap.servo.get("BS");
         climberServo = hardwareMap.servo.get("CS");
+        blockerServo = hardwareMap.servo.get("DS");
 
         buttonServo.setPosition(0);
         climberServo.setPosition(0);
@@ -173,6 +178,17 @@ public class CompetitionTeleOp extends OpMode {
         }
         else{
             handGateServo.setPosition(0.5);
+        }
+
+        // Front Debris Blocker
+        if(gamepad1.left_stick_button){
+            blockerServo.setPosition(1);
+        }
+        else if(gamepad1.right_stick_button){
+            blockerServo.setPosition(0);
+        }
+        else{
+            blockerServo.setPosition(0.525);
         }
 
         // Driver 2
@@ -216,7 +232,13 @@ public class CompetitionTeleOp extends OpMode {
             tiltPos+=10;
             tiltMotor.setTargetPosition(tiltPos);
         }
-        tiltMotor.setPower(0.13);
+
+        if((tiltPos-10) <= 0 && tiltMotor.getTargetPosition() == 0){
+            tiltMotor.setPower(0);
+        }
+        else{
+            tiltMotor.setPower(0.13);
+        }
 
         telemetry.addData("Tilt Encoder", tiltMotor.getCurrentPosition());
 
@@ -242,17 +264,6 @@ public class CompetitionTeleOp extends OpMode {
         }
         else{
             handSlideServo.setPosition(0.5);
-        }
-
-        // Climber Deposit
-        if(gamepad2.right_stick_button){
-            if(tiltMotor.getCurrentPosition() > 820){
-                climberServo.setPosition(0.5);
-            }
-            tiltMotor.setTargetPosition(840);
-        }
-        else{
-            climberServo.setPosition(0);
         }
     }
 
